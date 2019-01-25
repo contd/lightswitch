@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LightSwitch</title>
+		<link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABvFBMVEX////9+e734qvxznPvyGDvyGLy0n356L7+/Pj89ujz1orvx1/vx13vx17vx17vx13vyWP236L+/Pb9/Pfx1pHvxlvvx17vx17vx17vx17vx13vx1735LL2687sxmLvx17vx17vx17wx17vx17vx17vx17vxlzxz3T9+Ovv2qftxFvvx17vx17vx17mwmDpxF/ux17vx17vx17vyGH67s3////r1JntxFrwyF6+q2i0pWqgmW6uomurn2zRtmTwyF7vx1756cHs2abqwlrwyF69qmiEiXSJjHOLjXKHi3PStmTwyF7vyGH67s306c3lwF/vx17uxl6qn2zQtWS8qmi8qWjxyF7vxlzxz3T9+Ov9+/fnzo7owFnxyF64p2nau2LErmfLsmXxyF3vx1735LP59OfmyoTpwVq9qWbRtWO9qmfStmPxyWH236L+/Pb8+PDt2ae/rXPKtXK7rHXYwHr668P+/fnr7OrOz8jOz8jMzsjU1Mz09fTl5+jV2NrV2dvV2dvV2dvu8PDl5+jU2NnV2drV2drV2Nru8PDs7u/R1dbM0NLM0NLV2dr09fb+/v7j5OW9wcPCxsfu7/A2Wj6nAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAHUwAAB1MABkW0CHwAAAAd0SU1FB+IDEwwUHk/vgdoAAADBSURBVBjTY2AAAkYmZhZWNnYOBijg5OLm4eXjFxAUgvCFRUTFxCUkJKWkZSACsnLyCopKyiqqauoaYAFNLW0dXT19A0MjYxMQ39TM3MLSytrG1s7ewRGswsnZxdXN3cPTy9vHFyzg5x8QGBQcEhoWHhEJFoiKjomNi09ITEpOgbojNS09IzMrOyc3D+ay/ILCouKS0jIGOCivqKyqrkHwGWrr6hsam5AEmlta29o7kAQ6u7p7evuQBPonTJw0GcIEAJexKpeq7fCGAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE4LTAzLTE5VDEyOjIwOjMwLTA0OjAwSDqkrgAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxOC0wMy0xOVQxMjoyMDozMC0wNDowMDlnHBIAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAAAAElFTkSuQmCC"  rel="icon" type="image/x-icon">
+    <style media="screen">
+      button {
+        margin: 1em;
+        padding: 2em;
+        font-size: 2em;
+        background-color: grey;
+        border: 1px solid black;
+      }
+      button.on {
+        background-color: red;
+        font-weight: bold;
+      }
+      button.off {
+        background-color: blue;
+        font-weight: normal;
+      }
+    </style>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <h1>LightSwitch</h1>
+
+    <button type="button" id="onoff">On</button>
+    <button type="button" id="wemobtn">On</button>
+    <script>
+      function toggleBtn(state, btn) {
+        if (state) {
+          btn.classList.remove("off")
+          btn.classList.add("on")
+          btn.innerHTML = "On"
+        } else {
+          btn.classList.remove("on")
+          btn.classList.add("off")
+          btn.innerHTML = "Off"
+        }
+      }
+
+      async function switchLight(e) {
+        const el = e.target
+        const btnState = await axios.get('/tpstate')
+        if (btnState.data.lightState === 0) {
+          // axios get /tpon
+          axios.get('/tpon')
+            .then(function(resp) {
+              toggleBtn(true, el)
+            })
+            .catch(function(err) {
+              console.log(err)
+            })
+        } else {
+          // axios get /tpoff
+          axios.get('/tpoff')
+            .then(function(resp) {
+              toggleBtn(false, el)
+            })
+            .catch(function(err) {
+              console.log(err)
+            })
+        }
+      }
+      async function switchWemo(e) {
+        const el = e.target
+        const btnState = await axios.get('/wemostat')
+        if (btnState.data.lightState === "0") {
+          axios.get('/wemon')
+            .then((res) => {
+              toggleBtn(true, el)
+            })
+        } else {
+          axios.get('/wemoff')
+            .then((res) => {
+              toggleBtn(false, el)
+            })
+        }
+      }
+      async function getState() {
+        const btnState = await axios.get('/tpstate')
+        return btnState.data.lightState
+      }
+      const btn1 = document.getElementById("onoff")
+      btn1.addEventListener('click', switchLight)
+
+      const btn2 = document.getElementById("wemobtn")
+      btn2.addEventListener('click', switchWemo)
+
+      // Initialize button from current state
+      axios.get('/tpstate')
+        .then(res => {
+          const lstate = res.data.lightState
+          toggleBtn(lstate, btn1)
+        })
+      axios.get('/wemostat')
+        .then(res => {
+          const lstate = res.data.lightState
+          toggleBtn(parseInt(lstate), btn2)
+        })
+    </script>
+  </body>
+</html>

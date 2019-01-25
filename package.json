@@ -1,0 +1,19 @@
+{
+  "name": "lightswitch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "IoT Light Switch Web App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Jason Kumpf <jason@kumpf.io> (https://kumpf.io/)",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "express": "^4.16.3",
+    "tplink-lightbulb": "^1.4.1",
+    "wemo-client": "^0.15.0"
+  }
+}
